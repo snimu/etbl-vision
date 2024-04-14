@@ -1,3 +1,6 @@
+
+import itertools
+
 import torch 
 from torch import nn
 
@@ -9,16 +12,14 @@ def reduce_dimension(total_steps: int, current_step: int, initial_dim: int, fina
     return round(initial_dim - (initial_dim - final_dim) * current_step / total_steps)
 
 
-class MPL(nn.Module):
+class MLP(nn.Module):
     def __init__(self, num_layers: int = 5, imsize: int = 28*28, num_classes: int = 10):
-        super(MPL, self).__init__()
+        super().__init__()
+        sizes = [reduce_dimension(num_layers-1, i, imsize, num_classes) for i in range(num_layers)]
         self.layers = nn.ModuleList(
             [
-                nn.Linear(
-                    reduce_dimension(num_layers, i, imsize, num_classes), 
-                    reduce_dimension(num_layers, i, imsize, num_classes),
-                )
-                for i in range(num_layers)
+                nn.Linear(s1, s2)
+                for s1, s2 in itertools.pairwise(sizes)
             ]
         )
         self.relu = nn.ReLU()
@@ -29,4 +30,4 @@ class MPL(nn.Module):
         for layer in self.layers:
             x = self.relu(layer(x))
 
-        return self.softmax(x, dim=-1)
+        return self.softmax(x)

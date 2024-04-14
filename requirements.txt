@@ -2,4 +2,5 @@ torch
 torchvision
 einops
 matplotlib
-anthropic  # for instructor
+polars
+einops
